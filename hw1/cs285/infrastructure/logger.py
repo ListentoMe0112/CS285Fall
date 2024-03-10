@@ -46,6 +46,7 @@ class Logger:
 
         # log videos to tensorboard event file
         videos = np.stack(videos[:max_videos_to_save], 0)
+        print(video_title)
         self.log_video(videos, video_title, step, fps=fps)
 
     def log_figures(self, figure, name, step, phase):

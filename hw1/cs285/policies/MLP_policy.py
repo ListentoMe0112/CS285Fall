@@ -93,6 +93,7 @@ class MLPPolicySL(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
         self.learning_rate = learning_rate
         self.training = training
         self.nn_baseline = nn_baseline
+        self.loss = torch.nn.MSELoss()
 
         self.mean_net = build_mlp(
             input_size=self.ob_dim,
@@ -101,7 +102,6 @@ class MLPPolicySL(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
         )
         self.mean_net.to(ptu.device)
         self.logstd = nn.Parameter(
-
             torch.zeros(self.ac_dim, dtype=torch.float32, device=ptu.device)
         )
         self.logstd.to(ptu.device)
@@ -124,12 +124,30 @@ class MLPPolicySL(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
         :return:
             action: sampled action(s) from the policy
         """
-        # TODO: implement the forward pass of the network.
+        # Done implement the forward pass of the network.
         # You can return anything you want, but you should be able to differentiate
         # through it. For example, you can return a torch.FloatTensor. You can also
         # return more flexible objects, such as a
         # `torch.distributions.Distribution` object. It's up to you!
-        raise NotImplementedError
+        # logist = self.mean_net(observation)
+        # action_dist = torch.distributions.Categorical(torch.nn.Softmax(dim=1)(logist))
+        # action = action_dist.sample()
+
+        mean_out = self.mean_net(observation)
+        action_dist =torch.distributions.Normal(mean_out, torch.exp(self.logstd))
+        
+        return action_dist
+
+    def get_action(self, obs: np.ndarray) -> np.ndarray:
+        with torch.no_grad():
+            if len(obs.shape) > 1:
+                observation = obs
+            else:
+                observation = obs[None, :]
+            observation = ptu.from_numpy(observation.astype(np.float32))
+            action_dist = self(observation)
+            ac = action_dist.sample()
+            return ptu.to_numpy(ac)
 
     def update(self, observations, actions):
         """
@@ -141,7 +159,11 @@ class MLPPolicySL(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
             dict: 'Training Loss': supervised learning loss
         """
         # TODO: update the policy and return the loss
-        loss = TODO
+        actions_dist = self(observations)
+        loss = self.loss(actions_dist.rsample(), actions)
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
         return {
             # You can add extra logging information here, but keep this line
             'Training Loss': ptu.to_numpy(loss),
