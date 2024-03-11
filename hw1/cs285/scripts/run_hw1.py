@@ -128,22 +128,26 @@ def run_training_loop(params):
             # BC training from expert data.
             paths = pickle.load(open(params['expert_data'], 'rb'))
             envsteps_this_batch = 0
-        # else:
-        #     # DAGGER training from sampled data relabeled by expert
-        #     assert params['do_dagger']
-        #     # TODO: collect `params['batch_size']` transitions
-        #     # HINT: use utils.sample_trajectories
-        #     # TODO: implement missing parts of utils.sample_trajectory
-        #     paths, envsteps_this_batch = TODO
+        else:
+            # DAGGER training from sampled data relabeled by expert
+            assert params['do_dagger']
+            # Done: collect `params['batch_size']` transitions
+            # HINT: use utils.sample_trajectories
+            # Done: implement missing parts of utils.sample_trajectory
+            paths, envsteps_this_batch = utils.sample_trajectories(env, actor, params['batch_size'], params['ep_len'])
 
-        #     # relabel the collected obs with actions from a provided expert policy
-        #     if params['do_dagger']:
-        #         print("\nRelabelling collected observations with labels from an expert policy...")
+            # relabel the collected obs with actions from a provided expert policy
+            if params['do_dagger']:
+                print("\nRelabelling collected observations with labels from an expert policy...")
 
-        #         # TODO: relabel collected obsevations (from our policy) with labels from expert policy
-        #         # HINT: query the policy (using the get_action function) with paths[i]["observation"]
-        #         # and replace paths[i]["action"] with these expert labels
-        #         paths = TODO
+                # TODO: relabel collected obsevations (from our policy) with labels from expert policy
+                # HINT: query the policy (using the get_action function) with paths[i]["observation"]
+                # and replace paths[i]["action"] with these expert labels
+                for i in range(len(paths)):
+                    obs = paths[i]["observation"]
+                    acs = expert_policy.get_action(obs)
+                    paths[i]["action"] = acs
+                
 
         total_envsteps += envsteps_this_batch
         # add collected data to replay buffer
@@ -158,7 +162,8 @@ def run_training_loop(params):
           # HINT2: use np.random.permutation to sample random indices
           # HINT3: return corresponding data points from each array (i.e., not different indices from each array)
           # for imitation learning, we only need observations and actions.  
-          ob_batch, ac_batch = ptu.from_numpy(replay_buffer.obs[np.random.permutation(len(replay_buffer))[:params['train_batch_size']], :]), ptu.from_numpy(replay_buffer.acs[np.random.permutation(len(replay_buffer))[:params['train_batch_size']], :])
+          idx = np.random.permutation(len(replay_buffer))[:params['train_batch_size']]
+          ob_batch, ac_batch = ptu.from_numpy(replay_buffer.obs[idx]), ptu.from_numpy(replay_buffer.acs[idx])
           # use the sampled data to train an agent
           train_log = actor.update(ob_batch, ac_batch)
           training_logs.append(train_log)
@@ -214,20 +219,20 @@ def main():
     parser.add_argument('--env_name', '-env', type=str, help=f'choices: {", ".join(MJ_ENV_NAMES)}', required=True)
     parser.add_argument('--exp_name', '-exp', type=str, default='pick an experiment name', required=True)
     parser.add_argument('--do_dagger', action='store_true')
-    parser.add_argument('--ep_len', type=int, default=1000)
+    parser.add_argument('--ep_len', type=int)
 
-    parser.add_argument('--num_agent_train_steps_per_iter', type=int, default=10000)  # number of gradient steps for training policy (per iter in n_iter)
+    parser.add_argument('--num_agent_train_steps_per_iter', type=int, default=1000)  # number of gradient steps for training policy (per iter in n_iter)
     parser.add_argument('--n_iter', '-n', type=int, default=1)
 
     parser.add_argument('--batch_size', type=int, default=1000)  # training data collected (in the env) during each iteration
     parser.add_argument('--eval_batch_size', type=int,
-                        default=5000)  # eval data collected (in the env) for logging metrics
+                        default=1000)  # eval data collected (in the env) for logging metrics
     parser.add_argument('--train_batch_size', type=int,
-                        default=1024)  # number of sampled data points to be used per gradient/train step
+                        default=100)  # number of sampled data points to be used per gradient/train step
 
     parser.add_argument('--n_layers', type=int, default=2)  # depth, of policy to be learned
     parser.add_argument('--size', type=int, default=64)  # width of each layer, of policy to be learned
-    parser.add_argument('--learning_rate', '-lr', type=float, default=1e-2)  # LR for supervised learning
+    parser.add_argument('--learning_rate', '-lr', type=float, default=5e-3)  # LR for supervised learning
 
     parser.add_argument('--video_log_freq', type=int, default=5)
     parser.add_argument('--scalar_log_freq', type=int, default=1)

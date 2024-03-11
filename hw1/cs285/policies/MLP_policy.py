@@ -160,7 +160,7 @@ class MLPPolicySL(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
         """
         # TODO: update the policy and return the loss
         actions_dist = self(observations)
-        loss = self.loss(actions_dist.rsample(), actions)
+        loss = -torch.mean(actions_dist.log_prob(actions))
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
