@@ -58,3 +58,19 @@ python cs285/scripts/run_hw2.py  --env_name Humanoid-v4 --ep_len 1000  --discoun
 
 Although I don't reach return 300 by iterations which means I probably have a bug as material noted, I do reach a 600 average evaluation return within 10 hours.
 # Analysis
+## 1.  Applying Policy Gradient
+- a. Use policy gradient to compute gradient
+ $$\nabla_{\theta}J(\theta)=\mathbb{E}_{\tau \sim \pi_{\theta}}[\nabla_{\theta}\log\pi_{\theta}(\tau)R(\tau)]$$
+$$\nabla_{\theta}J(\theta)=\theta(1-\theta)·\nabla_{\theta}\log\theta(1-\theta)·1+\theta^2(1-\theta)·\nabla_{\theta}\log\theta^2(1-\theta)·2+...$$
+$$=\nabla_{\theta}\theta(1-\theta)·1+\nabla_{\theta}\theta^2(1-\theta)·2+...$$
+$$=\nabla_{\theta}(\theta(1-\theta)·1+\theta^2(1-\theta)·2+...)$$
+$$=\nabla_{\theta}(\theta/(1-\theta))$$
+$$=1/(1-\theta)^2.$$
+- b. Compute expectation directly, and take its gradient with respect to $\theta$ 
+$$\nabla_{\theta}\mathbb{E}_{\tau \sim \pi_{\theta}}R(\tau)$$$$=\nabla_{\theta}[\theta(1-\theta)+2\theta^2(1-\theta)+3\theta^3(1-\theta)+...]$$$$=\nabla_{\theta}[\theta+\theta^2+\theta^3+...]
+$$$$=\nabla_{\theta}[\theta/(1-\theta)]$$
+$$=1/(1-\theta)^2$$
+
+$|\theta|<1$. Then take its gradient w.r.t $\theta$ we simply arrive at $1/(1-\theta)^2$.
+
+This matches the policy gradient perfectly.

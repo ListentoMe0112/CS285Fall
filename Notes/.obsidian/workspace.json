@@ -8,16 +8,6 @@
         "type": "tabs",
         "children": [
           {
-            "id": "0cbd92372cc111c5",
-            "type": "leaf",
-            "state": {
-              "type": "image",
-              "state": {
-                "file": "Homework 1/Pasted image 20240313215145.png"
-              }
-            }
-          },
-          {
             "id": "da93507e43864bd0",
             "type": "leaf",
             "state": {
@@ -35,7 +25,19 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Homework 2/Homework 2.md",
+                "file": "Homework 3/Homework 3.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "e7a8b15e79dc6bc9",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Homework 3/Homework 3.md",
                 "mode": "source",
                 "source": false
               }
@@ -108,7 +110,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Homework 2/Homework 2.md",
+                "file": "Homework 3/Homework 3.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -125,7 +127,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Homework 2/Homework 2.md",
+                "file": "Homework 3/Homework 3.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -148,7 +150,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Homework 2/Homework 2.md"
+                "file": "Homework 3/Homework 3.md"
               }
             }
           }
@@ -170,22 +172,29 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "1217475e18f3b12d",
+  "active": "e7a8b15e79dc6bc9",
   "lastOpenFiles": [
-    "Homework 2/Experiment3.png",
-    "Homework 2/Experiment2.png",
+    "Homework 1/Figures",
+    "Homework 2/Figures",
+    "Homework 3/Figures",
     "Homework 2/Homework 2.md",
-    "Homework 2/Experiment1.png",
-    "Homework 1/Pasted image 20240313215145.png",
-    "CS285 Question.md",
-    "Homework 1/Snipaste_2024-03-13_21-48-07.jpg",
-    "Untitled",
+    "Homework 2/Figures/Experiment3.png",
+    "Homework 3/Homework 3.md",
+    "Homework 3/Figures/humanoid.png",
+    "Homework 3/Figures/CartPole_lr.png",
+    "Homework 3/Figures/CartPole0.0.1.png",
+    "Question/CS285 Question.md",
+    "Question/Pasted image 20240316180219.png",
+    "Question/Pasted image 20240316180155.png",
+    "Question",
+    "Homework 3/Figures/Figure_1.png",
+    "Homework 3/Figures/double_dqn_mapacman.png",
+    "Homework 3/Figures/ddqn_lunar.png",
+    "Homework 3",
+    "Homework 2/Figures/Experiment2.png",
     "Homework 1/Homework 1.md",
-    "Pasted image 20240316180219.png",
-    "Pasted image 20240316180155.png",
     "Homework 2",
     "Homework2",
-    "Homework 1/Snipaste_2024-03-13_21-49-14.jpg",
     "Homework 1",
     "Welcome.md"
   ]

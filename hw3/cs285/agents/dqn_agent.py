@@ -48,8 +48,12 @@ class DQNAgent(nn.Module):
         observation = ptu.from_numpy(np.asarray(observation))[None]
 
         # TODO(student): get the action from the critic using an epsilon-greedy strategy
-        action = ...
-
+        action = torch.argmax(self.critic(observation), dim = 1)
+        
+        if torch.rand(1,)[0] < epsilon:
+            action = torch.randint(self.num_actions, (1,))            
+            
+            
         return ptu.to_numpy(action).squeeze(0).item()
 
     def update_critic(
@@ -66,21 +70,23 @@ class DQNAgent(nn.Module):
         # Compute target values
         with torch.no_grad():
             # TODO(student): compute target values
-            next_qa_values = ...
+            next_qa_values = self.target_critic(next_obs)
 
             if self.use_double_q:
-                raise NotImplementedError
+                next_action = torch.argmax(self.critic(next_obs), dim=1)
             else:
-                next_action = ...
+                next_action = torch.argmax(next_qa_values, dim = 1)
             
-            next_q_values = ...
-            target_values = ...
+            next_q_values = torch.squeeze(torch.gather(next_qa_values, 1, torch.unsqueeze(next_action, dim = 1)), dim = 1)
+            
+            assert reward.shape == next_q_values.shape, "reward.shape: {} is not same as next_q_value.shape: {}".format(reward.shape, next_q_values.shape)
+            target_values = reward + self.discount * next_q_values * ~done
 
         # TODO(student): train the critic with the target values
-        qa_values = ...
-        q_values = ... # Compute from the data actions; see torch.gather
-        loss = ...
-
+        qa_values = self.critic(obs)
+        q_values = torch.squeeze(torch.gather(qa_values, 1, torch.unsqueeze(action, dim = 1)), dim = 1) # Compute from the data actions; see torch.gather
+        assert q_values.shape == target_values.shape, "q_values.shape {} is not same as targer_value.shape: {}".format(q_values.shape, target_values.shape)
+        loss = self.critic_loss(q_values, target_values)
 
         self.critic_optimizer.zero_grad()
         loss.backward()
@@ -114,5 +120,7 @@ class DQNAgent(nn.Module):
         Update the DQN agent, including both the critic and target.
         """
         # TODO(student): update the critic, and the target if needed
-
+        critic_stats = self.update_critic(obs, action, reward, next_obs, done)
+        if step % self.target_update_period == 0:
+            self.update_target_critic()
         return critic_stats
