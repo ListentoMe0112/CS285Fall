@@ -2,6 +2,9 @@ import pickle
 import time
 import argparse
 
+import sys
+sys.path.append("E:\CS285\CS285Fall\hw5")
+
 from cs285.agents.dqn_agent import DQNAgent
 import cs285.env_configs
 from cs285.envs import Pointmass

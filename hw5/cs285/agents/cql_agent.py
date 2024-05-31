@@ -42,6 +42,9 @@ class CQLAgent(DQNAgent):
 
         # TODO(student): modify the loss to implement CQL
         # Hint: `variables` includes qa_values and q_values from your CQL implementation
-        loss = loss + ...
+        
+        assert torch.sum(variables["qa_values"], dim =1).shape == variables["q_valuse"].shape, "sum_shape: {}, q_values.shape: {}".format(torch.sum(torch.exp(variables["qa_values"]), dim = 1), variables["q_valuse"].shape)
+        
+        loss = loss + self.cql_alpha * torch.mean(torch.log(torch.sum(torch.exp(variables["qa_values"]), dim = 1) - variables["q_valuse"]))
 
         return loss, metrics, variables

@@ -61,7 +61,9 @@ def run_training_loop(config: dict, logger: Logger, args: argparse.Namespace):
 
     # make the gym environment
     env = config["make_env"]()
-    exploration_schedule = config.get("exploration_schedule", None)
+    # exploration_schedule = config.get("exploration_schedule", None)
+    # Simple Argmax not exploration
+    exploration_schedule = None
     discrete = isinstance(env.action_space, gym.spaces.Discrete)
 
     assert discrete, "DQN only supports discrete action spaces"
