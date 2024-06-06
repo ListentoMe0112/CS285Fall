@@ -418,6 +418,9 @@ class Pointmass(gym.Env):
         done = (dist < self.epsilon) or (self.timesteps_left == 0)
         ns = self._normalize_obs(self.state.copy())
 
+        if (dist < self.epsilon):
+            print("success")
+
         if self.dense_reward:
             reward = -dist
         else:

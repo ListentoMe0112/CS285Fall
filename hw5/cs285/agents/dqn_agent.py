@@ -56,15 +56,22 @@ class DQNAgent(nn.Module):
             
         return ptu.to_numpy(action).squeeze(0).item()
 
-    def update_critic(
+    def compute_critic_loss(
         self,
         obs: torch.Tensor,
         action: torch.Tensor,
         reward: torch.Tensor,
         next_obs: torch.Tensor,
         done: torch.Tensor,
-    ) -> dict:
-        """Update the DQN critic, and return stats for logging."""
+    ) -> Tuple[torch.Tensor, dict, dict]:
+        """
+        Compute the loss for the DQN critic.
+
+        Returns:
+         - loss: torch.Tensor, the MSE loss for the critic
+         - metrics: dict, a dictionary of metrics to log
+         - variables: dict, a dictionary of variables that can be used in subsequent calculations
+        """
         (batch_size,) = reward.shape
 
         # Compute target values
@@ -87,22 +94,41 @@ class DQNAgent(nn.Module):
         q_values = torch.squeeze(torch.gather(qa_values, 1, torch.unsqueeze(action, dim = 1)), dim = 1) # Compute from the data actions; see torch.gather
         assert q_values.shape == target_values.shape, "q_values.shape {} is not same as targer_value.shape: {}".format(q_values.shape, target_values.shape)
         loss = self.critic_loss(q_values, target_values)
+        return (
+            loss,
+            {
+                "critic_loss": loss.item(),
+                "q_values": q_values.mean().item(),
+                "target_values": target_values.mean().item(),
+            },
+            {
+                "qa_values": qa_values,
+                "q_values": q_values,
+            },
+        )
+
+    def update_critic(
+        self,
+        obs: torch.Tensor,
+        action: torch.Tensor,
+        reward: torch.Tensor,
+        next_obs: torch.Tensor,
+        done: torch.Tensor,
+    ) -> dict:
+        """Update the DQN critic, and return stats for logging."""
+        loss, metrics, _ = self.compute_critic_loss(obs, action, reward, next_obs, done)
 
         self.critic_optimizer.zero_grad()
         loss.backward()
         grad_norm = torch.nn.utils.clip_grad.clip_grad_norm_(
             self.critic.parameters(), self.clip_grad_norm or float("inf")
         )
+        metrics["grad_norm"] = grad_norm.item()
         self.critic_optimizer.step()
 
         self.lr_scheduler.step()
 
-        return {
-            "critic_loss": loss.item(),
-            "q_values": q_values.mean().item(),
-            "target_values": target_values.mean().item(),
-            "grad_norm": grad_norm.item(),
-        }
+        return metrics
 
     def update_target_critic(self):
         self.target_critic.load_state_dict(self.critic.state_dict())

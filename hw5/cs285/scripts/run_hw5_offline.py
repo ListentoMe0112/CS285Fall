@@ -3,7 +3,7 @@ import time
 import argparse
 
 import sys
-sys.path.append("E:\CS285\CS285Fall\hw5")
+sys.path.append("F:\CS285\homework_fall2023\hw5")
 
 from cs285.agents.dqn_agent import DQNAgent
 import cs285.env_configs

@@ -3,7 +3,7 @@ import argparse
 import pickle
 
 import sys
-sys.path.append("E:\CS285\CS285Fall\hw5")
+sys.path.append("F:\CS285\homework_fall2023\hw5")
 
 from cs285.agents import agents as agent_types
 from cs285.envs import Pointmass

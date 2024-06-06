@@ -18,8 +18,21 @@
                 "source": false
               }
             }
+          },
+          {
+            "id": "19834dedb86b580e",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Homework 5/Homework 5.md",
+                "mode": "source",
+                "source": false
+              }
+            }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -85,7 +98,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Homework 4/Homework 4.md",
+                "file": "Homework 5/Homework 5.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +115,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Homework 4/Homework 4.md",
+                "file": "Homework 5/Homework 5.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +138,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Homework 4/Homework 4.md"
+                "file": "Homework 5/Homework 5.md"
               }
             }
           }
@@ -147,34 +160,34 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "da93507e43864bd0",
+  "active": "19834dedb86b580e",
   "lastOpenFiles": [
+    "Homework 5/Figures/Pasted image 20240602095344.png",
+    "Homework 5/Homework 5.md",
+    "Homework 5/Figures/CQL.png",
+    "Homework 5/Figures/PointmassHard-v0_rnd1.png",
+    "Homework 5/Figures/PointmassEasy-v0_rnd1.png",
+    "Homework 5/Figures/PointmassMedium-v0_rnd1.png",
+    "Homework 5/Figures/PointmassMedium-v0_random.png",
+    "Homework 5/Figures/PointmassHard-v0_random.png",
+    "Homework 5/Figures/PointmassEasy-v0_random.png",
+    "Homework 5/Figures",
+    "Homework 4/Homework 4.md",
+    "Homework 5",
     "Homework 4/Figures/Problem6.png",
     "Homework 4/Figures/Problem4.png",
-    "Homework 4/Figures/Problem3.png",
-    "Homework 4/Figures/obstacles_1_iter.png",
-    "Homework 4/Homework 4.md",
     "Homework 2/Homework 2.md",
-    "Homework 4/Figures/l1-h32.png",
     "Homework 3/Homework 3.md",
-    "Homework 4/Figures/l2-h32.png",
-    "Homework 4/Figures/l1-h64.png",
     "Homework 4/Figures",
     "Homework 4",
     "Homework 1/Figures",
     "Homework 2/Figures",
     "Homework 3/Figures",
-    "Homework 2/Figures/Experiment3.png",
-    "Homework 3/Figures/humanoid.png",
-    "Homework 3/Figures/CartPole_lr.png",
-    "Homework 3/Figures/CartPole0.0.1.png",
     "Question/CS285 Question.md",
     "Question",
     "Homework 3",
     "Homework 1/Homework 1.md",
     "Homework 2",
-    "Homework2",
-    "Homework 1",
     "Welcome.md"
   ]
 }
