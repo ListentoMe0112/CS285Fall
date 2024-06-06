@@ -35,10 +35,10 @@ class AWACAgent(DQNAgent):
             # TODO(student): compute the actor distribution, then use it to compute E[Q(s, a)]
             next_qa_values = self.target_critic(next_observations)
             # Use the actor to compute a critic backup
-            next_action_dist = self.actor(next_observations)
+            next_action_dist:torch.distributions.Distribution = self.actor(next_observations)
             # values = torch.sum(torch.exp(action_dist.logits) * next_qa_values, dim = 1)
-            next_values = torch.squeeze(torch.gather(next_qa_values, 1, torch.unsqueeze(next_action_dist.sample(), dim = 1)), dim = 1)
-            assert next_values.shape == rewards.shape == (batch_size, ), "next_qs.shape: {}, rewards.shape: {}".format(values.shape, rewards.shape)
+            next_values = torch.sum(torch.exp(next_action_dist.logits) * next_qa_values, dim = 1)
+            assert next_values.shape == rewards.shape == (batch_size, ), "next_qs.shape: {}, rewards.shape: {}".format(next_values.shape, rewards.shape)
             # TODO(student): Compute the TD target
             target_values = rewards + self.discount * next_values * (1 - dones.int())
 
@@ -71,16 +71,17 @@ class AWACAgent(DQNAgent):
     ):
         # TODO(student): compute the advantage of the actions compared to E[Q(s, a)]
         batch_size = observations.shape[0]
-        qa_values = self.target_critic(observations)
-        q_values = torch.squeeze(torch.gather(qa_values, 1, torch.unsqueeze(actions, dim = 1)), dim = 1)
-        
-        assert action_dist.logits.shape == qa_values.shape == (action_dist.logits * qa_values).shape == (batch_size, self.num_actions),"action_dist.logits.shape: {}, qa_values.shape: {}, multi_shape: {}".format(action_dist.logits.shape, qa_values.shape, (action_dist.logits * qa_values).shape)
-        # values = torch.sum(torch.exp(action_dist.logits) * qa_values, dim = 1)
-        values = torch.squeeze(torch.gather(qa_values, 1, torch.unsqueeze(action_dist.sample(), dim = 1)), dim = 1)
+        with torch.no_grad():
+            qa_values = self.target_critic(observations)
+            q_values = torch.squeeze(torch.gather(qa_values, 1, torch.unsqueeze(actions, dim = 1)), dim = 1)
+            
+            assert action_dist.logits.shape == qa_values.shape == (action_dist.logits * qa_values).shape == (batch_size, self.num_actions),"action_dist.logits.shape: {}, qa_values.shape: {}, multi_shape: {}".format(action_dist.logits.shape, qa_values.shape, (action_dist.logits * qa_values).shape)
+            # values = torch.sum(torch.exp(action_dist.logits) * qa_values, dim = 1)
+            values = torch.sum(torch.exp(action_dist.logits) * qa_values, dim = 1)
 
-        assert q_values.shape == values.shape == (batch_size,),  "q_values.shape: {}, values.shape: {}".format(q_values.shape, values.shape)
-        advantages = q_values - values
-        return advantages
+            assert q_values.shape == values.shape == (batch_size,),  "q_values.shape: {}, values.shape: {}".format(q_values.shape, values.shape)
+            advantages = q_values - values
+            return advantages
 
     def update_actor(
         self,

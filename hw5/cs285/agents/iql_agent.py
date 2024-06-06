@@ -38,14 +38,14 @@ class IQLAgent(AWACAgent):
         action_dist: Optional[torch.distributions.Categorical] = None,
     ):
         # TODO(student): Compute advantage with IQL
+        with torch.no_grad():
+            qa_values = self.target_critic(observations)
+            q_values = torch.squeeze(torch.gather(qa_values, 1, torch.unsqueeze(actions, dim = 1)), dim = 1)
         
-        qa_values = self.target_critic(observations)
-        q_values = torch.squeeze(torch.gather(qa_values, 1, torch.unsqueeze(actions, dim = 1)), dim = 1)
+            values = torch.squeeze(self.target_value_critic(observations), dim = 1)
+            assert q_values.shape == values.shape, "q_values.shape: {}, values.shape{}".format(q_values.shape, values.shape)
         
-        values = torch.squeeze(self.target_value_critic(observations), dim = 1)
-        assert q_values.shape == values.shape, "q_values.shape: {}, values.shape{}".format(q_values.shape, values.shape)
-        
-        return q_values - values
+            return q_values - values
 
     def update_q(
         self,
