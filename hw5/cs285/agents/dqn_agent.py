@@ -87,7 +87,7 @@ class DQNAgent(nn.Module):
             next_q_values = torch.squeeze(torch.gather(next_qa_values, 1, torch.unsqueeze(next_action, dim = 1)), dim = 1)
             
             assert reward.shape == next_q_values.shape, "reward.shape: {} is not same as next_q_value.shape: {}".format(reward.shape, next_q_values.shape)
-            target_values = reward + self.discount * next_q_values * ~done
+            target_values = reward + self.discount * next_q_values * (1 - done.int())
 
         # TODO(student): train the critic with the target values
         qa_values = self.critic(obs)

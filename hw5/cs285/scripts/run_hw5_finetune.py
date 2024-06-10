@@ -2,6 +2,9 @@ import time
 import argparse
 import pickle
 
+import sys
+sys.path.append("F:\CS285\homework_fall2023\hw5")
+
 from cs285.agents import agents as agent_types
 from cs285.envs import Pointmass
 
@@ -47,9 +50,12 @@ def run_training_loop(config: dict, logger: Logger, args: argparse.Namespace):
     ep_len = env.spec.max_episode_steps or env.max_episode_steps
 
     observation = None
+    epsilon = None
+    
 
     # Replay buffer
-    replay_buffer = ReplayBuffer(capacity=config["total_steps"])
+    with open(os.path.join(args.dataset_dir, f"{config['dataset_name']}.pkl"), "rb") as f:
+         replay_buffer = pickle.load(f)
 
     observation = env.reset()
 
@@ -57,10 +63,23 @@ def run_training_loop(config: dict, logger: Logger, args: argparse.Namespace):
 
     num_offline_steps = config["offline_steps"]
     num_online_steps = config["total_steps"] - num_offline_steps
-
+    
     for step in tqdm.trange(config["total_steps"], dynamic_ncols=True):
         # TODO(student): Borrow code from another online training script here. Only run the online training loop after `num_offline_steps` steps.
+        if step > num_offline_steps:
+            epsilon = exploration_schedule.value(step)
+            action = agent.get_action(observation, epsilon)
+            next_observation, reward, done, info =  env.step(action)
+            next_observation = np.asarray(next_observation)
+            truncated = info.get("TimeLimit.truncated", False)
+            
+            recent_observations.append(observation)
+            replay_buffer.insert(observation, action, reward, next_observation, done and not truncated)            
 
+            if done:
+                observation = env.reset()
+            else:
+                observation = next_observation
         # Main training loop
         batch = replay_buffer.sample(config["batch_size"])
 
@@ -107,7 +126,7 @@ def run_training_loop(config: dict, logger: Logger, args: argparse.Namespace):
                 logger.log_scalar(np.max(ep_lens), "eval/ep_len_max", step)
                 logger.log_scalar(np.min(ep_lens), "eval/ep_len_min", step)
 
-        if step % args.visualize_interval == 0:
+        if step % args.visualize_interval == 0 and len(recent_observations) > 0:
             env_pointmass: Pointmass = env.unwrapped
             observations = np.stack(recent_observations)
             recent_observations = []
@@ -119,10 +138,10 @@ def run_training_loop(config: dict, logger: Logger, args: argparse.Namespace):
             )
 
     # Save the final dataset
-    dataset_file = os.path.join(args.dataset_dir, f"{config['dataset_name']}.pkl")
-    with open(dataset_file, "wb") as f:
-        pickle.dump(replay_buffer, f)
-        print("Saved dataset to", dataset_file)
+    # dataset_file = os.path.join(args.dataset_dir, f"{config['dataset_name']}.pkl")
+    # with open(dataset_file, "wb") as f:
+    #     pickle.dump(replay_buffer, f)
+    #     print("Saved dataset to", dataset_file)
 
     # Render final heatmap
     fig = visualize(
