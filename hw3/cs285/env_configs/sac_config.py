@@ -60,7 +60,7 @@ def sac_config(
             return MLPPolicy(
                 ac_dim=action_dim,
                 ob_dim=np.prod(observation_shape),
-                discrete=False,
+                discrete=True,
                 n_layers=num_layers,
                 layer_size=hidden_size,
                 use_tanh=use_tanh,
@@ -71,7 +71,7 @@ def sac_config(
             return MLPPolicy(
                 ac_dim=action_dim,
                 ob_dim=np.prod(observation_shape),
-                discrete=False,
+                discrete=True,
                 n_layers=num_layers,
                 layer_size=hidden_size,
                 use_tanh=use_tanh,

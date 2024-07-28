@@ -36,7 +36,7 @@ class MLPPolicy(nn.Module):
         if discrete:
             self.logits_net = ptu.build_mlp(
                 input_size=ob_dim,
-                output_size=ac_dim,
+                output_size=20,
                 n_layers=n_layers,
                 size=layer_size,
             ).to(ptu.device)

@@ -1,5 +1,6 @@
 from typing import Callable, Optional, Sequence, Tuple
 import copy
+import torch.nn.functional as F
 
 
 import torch
@@ -108,6 +109,7 @@ class SoftActorCritic(nn.Module):
             observation = ptu.from_numpy(observation)[None]
             action_distribution: torch.distributions.Distribution = self.actor(observation)
             action: torch.Tensor = action_distribution.sample()
+            action = action.reshape(1,-1)
 
             assert action.shape == (1, self.action_dim), action.shape
             return ptu.to_numpy(action).squeeze(0)
@@ -192,7 +194,7 @@ class SoftActorCritic(nn.Module):
             # Sample from the actor
             next_action_distribution: torch.distributions.Distribution = self.actor(next_obs)
             next_action = next_action_distribution.sample()
-
+            next_action = next_action.reshape(-1,1)
             # Compute the next Q-values for the sampled actions
             next_qs = self.target_critic(next_obs, next_action)
 
@@ -236,6 +238,13 @@ class SoftActorCritic(nn.Module):
             "next_action_entropy" : next_action_entropy.mean().item(),
         }
 
+    def gumbel_softmax_sample(self, logits, temperature):
+        # Sample from Gumbel(0, 1)
+        gumbel_noise = -torch.log(-torch.log(torch.rand_like(logits) + 1e-20) + 1e-20)
+        # Apply softmax to the perturbed logits
+        y = logits + gumbel_noise
+        return F.softmax(y / temperature, dim=-1)
+
     def entropy(self, action_distribution: torch.distributions.Distribution):
         """
         Compute the (approximate) entropy of the action distribution for each batch element.
@@ -243,9 +252,7 @@ class SoftActorCritic(nn.Module):
 
         # TODO(student): Compute the entropy of the action distribution.
         # Note: Think about whether to use .rsample() or .sample() here...
-        approximate_acts = action_distribution.rsample()
-        next_acts_log_probs = action_distribution.log_prob(approximate_acts)
-        return - next_acts_log_probs
+        return action_distribution.entropy()
 
     def actor_loss_reinforce(self, obs: torch.Tensor):
         batch_size = obs.shape[0]
@@ -256,6 +263,7 @@ class SoftActorCritic(nn.Module):
         with torch.no_grad():
             # TODO(student): draw num_actor_samples samples from the action distribution for each batch element
             action = action_distribution.sample(torch.Size((self.num_actor_samples,)))
+            action = action.reshape([self.num_actor_samples, batch_size, -1])
             assert action.shape == (
                 self.num_actor_samples,
                 batch_size,
@@ -277,6 +285,7 @@ class SoftActorCritic(nn.Module):
 
         # Do REINFORCE: calculate log-probs and use the Q-values
         # TODO(student)
+        action = action.reshape([self.num_actor_samples, batch_size])
         log_probs = action_distribution.log_prob(action)
 
         assert log_probs.shape == q_values.shape == (self.num_actor_samples, batch_size), "log_probs.shape: {}, q_values.shape: {}".format(log_probs.shape, q_values.shape)
@@ -293,7 +302,7 @@ class SoftActorCritic(nn.Module):
 
         # TODO(student): Sample actions
         # Note: Think about whether to use .rsample() or .sample() here...
-        action = action_distribution.rsample()
+        action = self.gumbel_softmax_sample(action_distribution.logits, 1)
 
         assert action.shape == (batch_size, self.action_dim), "action.shape: {}".format(action.shape)
 
